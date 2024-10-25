@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Language Recognition</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            margin: 0;
+            min-height: 100vh;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+        }
+
+        header {
+            position: relative;
+            width: 100%;
+            padding: 20px 0;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 30px;
+        }
+
+        #video-container {
+            border: 2px solid #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s ease;
+        }
+
+        img {
+            display: block;
+            width: 45dvw;  
+            height: auto;
+        }
+
+        #letter-display {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            width: 35dvw; 
+            font-size: 22rem;  
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFD700; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        footer {
+            margin-top: 20px;
+            font-size: 1em;
+            color: #f5f5f5;
+        }
+
+        .button {
+            padding: 10px 20px;
+            background-color: #ffffff;
+            color: #6a11cb;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+            margin: 10px;
+            display: inline-block;
+        }
+
+        .button:hover {
+            background-color: #f5f5f5;
+            color: #2575fc;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Sign Language Recognition</h1>
+    </header>
+    <div class="container">
+        <div id="video-container">
+            <img id="video-feed-img" src="{{ url_for('video_feed') }}" alt="Video Feed">
+        </div>
+        <div id="letter-display"></div> 
+    </div>
+    <footer>
+        <button class="button" onclick="refreshVideo()">Refresh Video Feed <i class="fas fa-sync-alt"></i></button>
+    </footer>
+
+    <script>
+        function refreshVideo() {
+            const img = document.querySelector('#video-container img');
+            img.src = '{{ url_for("video_feed") }}?t=' + new Date().getTime();  
+        }
+    
+        function updateLetterDisplay(letter) {
+            document.getElementById('letter-display').innerText = letter;
+        }
+    
+        setInterval(() => {
+            fetch('/latest_prediction')
+                .then(response => response.text())
+                .then(data => {
+                    updateLetterDisplay(data);  
+                });
+        }, 1000); 
+        function adjustLetterDisplayHeight() {
+            const videoImg = document.getElementById('video-feed-img');
+            const letterDisplay = document.getElementById('letter-display');
+            letterDisplay.style.height = (videoImg.clientHeight + 4) + 'px';
+        }
+
+        window.onload = adjustLetterDisplayHeight;
+        window.onresize = adjustLetterDisplayHeight;
+    </script>    
+</body>
+</html>
